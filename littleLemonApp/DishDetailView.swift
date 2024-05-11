@@ -1,10 +1,3 @@
-//
-//  DishDetailView.swift
-//  littleLemonApp
-//
-//  Created by Daniel Bauer on 10.05.24.
-//
-
 import SwiftUI
 
 struct DishDetailView: View {
@@ -14,22 +7,33 @@ struct DishDetailView: View {
         VStack {
             Text(dish.title ?? "")
                 .font(.title)
-            Text("$\(dish.price ?? "")")
-                .font(.headline)
-                .padding(.bottom, 20)
+                .fontWeight(.bold)
+                .padding(.bottom, 8)
+            
             AsyncImage(url: URL(string: dish.image ?? "")) { phase in
                 switch phase {
                 case .success(let image):
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .cornerRadius(10) 
                 default:
                     ProgressView()
                 }
             }
+            
+            // Beschreibung und Preis
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Price: $\(dish.price ?? "")")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                Text(dish.descrip ?? "")
+                    .font(.body)
+            }
+            .padding()
         }
-        .padding()
         .navigationBarTitle(Text("Dish Details"))
     }
 }

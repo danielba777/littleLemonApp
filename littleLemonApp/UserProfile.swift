@@ -1,10 +1,3 @@
-//
-//  UserProfile.swift
-//  littleLemonApp
-//
-//  Created by Daniel Bauer on 10.05.24.
-//
-
 import SwiftUI
 
 struct UserProfile: View {

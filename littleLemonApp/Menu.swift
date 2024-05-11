@@ -4,9 +4,12 @@ import CoreData
 struct Menu: View {
     
     @State private var searchText = ""
+    @State private var selectedCategory: String? 
+    @State private var dataLoaded = false
     @Environment(\.managedObjectContext) private var viewContext
-    
     @FetchRequest var dishes: FetchedResults<Dish>
+    
+    let categories = ["All", "starters", "mains", "desserts"]
     
     init() {
         let request: NSFetchRequest<Dish> = Dish.fetchRequest()
@@ -35,11 +38,31 @@ struct Menu: View {
                     .padding(.horizontal)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(20)
+                
             }
-                .background(Color("Primary01"))
+            .background(Color("Primary01"))
+            .padding(.bottom, 10)
+            Text("Order for Delivery")
+                .font(.title2)
+                .fontWeight(.bold)
+            HStack {
+                ForEach(categories, id: \.self) { category in
+                    Button(action: {
+                        selectedCategory = category == "All" ? nil : category
+                    }) {
+                        Text(category.capitalized)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 20)
+                            .background(selectedCategory == category ? Color.blue : Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                }
+            }
+            .padding(.vertical, 10)
             
             List {
-                ForEach(dishes.filter { searchText.isEmpty || $0.title?.localizedCaseInsensitiveContains(searchText) == true }, id: \.self) { dish in
+                ForEach(filteredDishes, id: \.self) { dish in
                     NavigationLink(destination: DishDetailView(dish: dish)) {
                         HStack {
                             VStack(alignment: .leading, spacing: 8) {
@@ -70,9 +93,20 @@ struct Menu: View {
                     }
                 }
             }
-            
         }.onAppear(){
-            getMenuData()
+            if !dataLoaded {
+                getMenuData()
+                dataLoaded = true
+            }
+        }
+    }
+    
+    // Filter dishes based on selected category
+    var filteredDishes: [Dish] {
+        if let selectedCategory = selectedCategory, selectedCategory != "All" {
+            return dishes.filter { $0.category == selectedCategory }
+        } else {
+            return Array(dishes)
         }
     }
     
@@ -116,6 +150,8 @@ struct Menu: View {
         }.resume()
     }
 }
+
+
 
 func buildSortDescriptors() -> [NSSortDescriptor] {
     return [NSSortDescriptor(key: "title", ascending: true, selector: #selector(NSString.localizedStandardCompare))]
